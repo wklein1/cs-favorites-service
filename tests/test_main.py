@@ -79,6 +79,34 @@ def test_post_favorite_endpoint_adds_component_favorite_to_list():
     #ASSERT
     assert response.status_code == 201
     assert response.json() == expected_favorites_obj
+
+
+def test_post_favorite_endpoint_fails_to_add_already_added_product_to_favorites():
+    #ARRANGE
+    client = TestClient(app)
+    TEST_USER_ID = config("TEST_USER_ID")
+    expected_error = {
+        "detail": "Item is already in favorites list."
+    }
+    client.post("/favorites",json={"id":"29f6f518-53a8-11ed-a980-cd9f67f7363d","item_type":"product"},Header={"userId":TEST_USER_ID})
+    #ACT
+    response = client.post("/favorites",json={"id":"29f6f518-53a8-11ed-a980-cd9f67f7363d","item_type":"product"},Header={"userId":TEST_USER_ID})
+    #ASSERT
+    assert response.status_code == 409
+    assert response.json() == expected_error
+
+def test_post_favorite_endpoint_fails_to_add_already_added_component_to_favorites():
+    #ARRANGE
+    client = TestClient(app)
+    TEST_USER_ID = config("TEST_USER_ID")
+    expected_error = {
+        "detail": "Item is already in favorites list."
+    }
+    #ACT
+    response = client.post("/favorites",json={"id":"546c08de-539d-11ed-a980-cd9f67f7363d","item_type":"component"},Header={"userId":TEST_USER_ID})
+    #ASSERT
+    assert response.status_code == 409
+    assert response.json() == expected_error
     
 
 def test_delete_favorites_endpoint():
