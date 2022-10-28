@@ -2,8 +2,7 @@ from models.custom_base_model import CustomBaseModel
 from pydantic import Field
 
 class FavoritesModel(CustomBaseModel):
-    key: str = Field(alias="favoritesListId")
-    owner_id: str
+    key: str = Field(alias="ownerId")
     component_ids: list[str]
     product_ids: list[str]
 
@@ -13,3 +12,6 @@ class FavoritesModel(CustomBaseModel):
 class ToggleFavoriteModel(CustomBaseModel):
     owner_id: str
     to_favorites_id: str
+
+class FavoritesRequestModel(CustomBaseModel):
+    key: str = Field(alias="ownerId")
