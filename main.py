@@ -69,14 +69,14 @@ async def create_favorites_obj_for_user(owner:favorites_models.FavoritesRequestM
         },
         503 :{
             "model": error_models.HTTPErrorModel,
-            "description": "Error raised if database requests fail."
+            "description": "Error raised if database request fails."
         }},
     description="Adds an item to the favorites list of the user.",
 )
 async def adds_item_to_user_favorites_list(item_to_add:favorites_models.ToggleFavoriteModel, user_id: str = Header(alias="userId")):
     try:
         favorites_obj = favoritesDB.fetch({"key": user_id}).items[0]
-    except Exception as ex:
+    except Exception:
             raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Error while connecting to database")
     
     if item_to_add.item_type == "component":
@@ -91,14 +91,55 @@ async def adds_item_to_user_favorites_list(item_to_add:favorites_models.ToggleFa
     
     try:
         updated_favorites_obj = favoritesDB.update(update, user_id)
-    except Exception as ex:
+    except Exception:
             raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Error while connecting to database")
 
 
 @app.delete(
-     "/favorites",
+    "/favorites",
     status_code=status.HTTP_204_NO_CONTENT,
     description="Deletes the favorites list of a user",
 )
 async def delete_favorites_obj_for_user(owner:favorites_models.FavoritesRequestModel):
-    favoritesDB.delete(owner.key)
+    try:
+        favoritesDB.delete(owner.key)
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+
+@app.delete(
+     "/favorites/items",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={503 :{
+            "model": error_models.HTTPErrorModel,
+            "description": "Error raised if database request fails."
+        }},
+    description="Removes an item from the favorites list of a user"
+)
+async def delete_item_from_favorites_for_user(item_to_remove:favorites_models.ToggleFavoriteModel, user_id: str = Header(alias="userId")):
+    try:
+        favorites_obj = favoritesDB.fetch({"key": user_id}).items[0]
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Error while connecting to database")
+    
+    try:
+        
+        if item_to_remove.item_type == "component":
+            component_favorites = favorites_obj["component_ids"]
+            try:
+               component_favorites.remove(item_to_remove.id)
+            except ValueError:
+                return
+            update = {"component_ids":component_favorites}
+
+        elif item_to_remove.item_type == "product":
+            product_favorites = favorites_obj["product_ids"]
+            try:
+                product_favorites.remove(item_to_remove.id)
+            except ValueError:
+                return
+            update = {"product_ids":product_favorites}
+        favoritesDB.update(update, user_id)
+
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Error while connecting to database")

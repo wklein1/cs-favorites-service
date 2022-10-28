@@ -63,7 +63,9 @@ def test_post_favorite_endpoint_adds_product_favorite_to_list():
     response = client.post("/favorites/items",json={"id":"29f6f518-53a8-11ed-a980-cd9f67f7363d","itemType":"product"},headers={"userId":TEST_USER_ID})
     #ASSERT
     assert response.status_code == 204
-    # assert response.json() == expected_favorites_obj
+    #CLEANUP
+    client.delete("/favorites/items",json={"id":"29f6f518-53a8-11ed-a980-cd9f67f7363d","itemType":"product"}, headers={"userId":TEST_USER_ID})
+
 
 def test_post_favorite_endpoint_adds_component_favorite_to_list():
     #ARRANGE
@@ -78,7 +80,8 @@ def test_post_favorite_endpoint_adds_component_favorite_to_list():
     response = client.post("/favorites/items",json={"id":"546c08de-539d-11ed-a980-cd9f67f7363d","itemType":"component"},headers={"userId":TEST_USER_ID})
     #ASSERT
     assert response.status_code == 204
-    # assert response.json() == expected_favorites_obj
+    #CLEANUP
+    client.delete("/favorites/items",json={"id":"546c08de-539d-11ed-a980-cd9f67f7363d","itemType":"component"}, headers={"userId":TEST_USER_ID})
 
 
 def test_post_favorite_endpoint_fails_to_add_already_added_product_to_favorites():
@@ -103,7 +106,7 @@ def test_post_favorite_endpoint_fails_to_add_already_added_component_to_favorite
         "detail": "Item is already in favorites list."
     }
     #ACT
-    response = client.post("/favorites/items",json={"id":"546c08de-539d-11ed-a980-cd9f67f7363d","itemType":"component"},headers={"userId":TEST_USER_ID})
+    response = client.post("/favorites/items",json={"id":"546c08d7-539d-11ed-a980-cd9f67f7363d","itemType":"component"},headers={"userId":TEST_USER_ID})
     #ASSERT
     assert response.status_code == 409
     assert response.json() == expected_error
@@ -121,5 +124,26 @@ def test_delete_favorites_endpoint():
     client.post("/favorites",json={"ownerId":random_user_id})
     #ACT
     response = client.delete("/favorites",json={"ownerId":random_user_id})
+    #ASSERT
+    assert response.status_code == 204
+
+
+def test_delete_favorite_endpoint_deletes_product_favorite():
+    #ARRANGE
+    client = TestClient(app)
+    TEST_USER_ID = config("TEST_USER_ID")
+    client.post("/favorites/items",json={"id":"29f6f518-53a8-11ed-a980-cd9f67f7363d","itemType":"product"},headers={"userId":TEST_USER_ID})
+    #ACT
+    response = client.delete("/favorites/items",json={"id":"29f6f518-53a8-11ed-a980-cd9f67f7363d","itemType":"product"}, headers={"userId":TEST_USER_ID})
+    #ASSERT
+    assert response.status_code == 204
+
+def test_delete_favorite_endpoint_deletes_component_favorite():
+    #ARRANGE
+    client = TestClient(app)
+    TEST_USER_ID = config("TEST_USER_ID")
+    client.post("/favorites/items",json={"id":"546c08de-539d-11ed-a980-cd9f67f7363d","itemType":"component"},headers={"userId":TEST_USER_ID})
+    #ACT
+    response = client.delete("/favorites/items",json={"id":"546c08de-539d-11ed-a980-cd9f67f7363d","itemType":"component"}, headers={"userId":TEST_USER_ID})
     #ASSERT
     assert response.status_code == 204
