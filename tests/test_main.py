@@ -23,7 +23,7 @@ def test_get_favorites_endpoint_returns_favorites_for_user():
 def test_post_favorites_endpoint_creates_favorites_obj():
     #ARRANGE
     client = TestClient(app)
-    random_user_id = uuid.uuid1()
+    random_user_id = str(uuid.uuid1())
     expected_favorites_obj = {
         "ownerId":random_user_id,
         "componentIds":[],
