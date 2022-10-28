@@ -1,6 +1,7 @@
 from fastapi import FastAPI
-import deta
+from fastapi.middleware.cors import CORSMiddleware
 from decouple import config
+import deta
 
 PROJECT_KEY = config("PROJECT_KEY")
 
