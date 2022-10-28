@@ -1,6 +1,7 @@
 from models.custom_base_model import CustomBaseModel
+from pydantic import Field
 
-def FavoritesModel(CustomBaseModel):
+class FavoritesModel(CustomBaseModel):
     key: str = Field(alias="favoritesListId")
     owner_id: str
     component_ids: list[str]

@@ -10,10 +10,10 @@ def test_get_favorites_endpoint_returns_favorites_for_user():
         "favoritesListId":"test_favorites_list_id",
         "ownerId":TEST_USER_ID,
         "componentIds":["546c08d7-539d-11ed-a980-cd9f67f7363d","546c08da-539d-11ed-a980-cd9f67f7363d"],
-        "productIds":[],
+        "productIds":[]
     }
     #ACT
-    response = client.get(f"/favorites",headers={"userId":TEST_USER_ID})
+    response = client.get("/favorites",headers={"userId":TEST_USER_ID})
     #ASSERT
     assert response.status_code == 200
-    assert expected_favorites_obj in response.json()
+    assert expected_favorites_obj == response.json()
