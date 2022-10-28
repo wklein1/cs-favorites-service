@@ -33,6 +33,8 @@ def test_post_favorites_endpoint_creates_favorites_obj():
     #ASSERT
     assert response.status_code == 201
     assert response.json().items() >= expected_favorites_obj.items()
+    #CLEANUP
+    client.delete("/favorites",json={"ownerId":random_user_id})
 
 
 def test_post_favorites_endpoint_fails_creating_existing_favorites_obj():
