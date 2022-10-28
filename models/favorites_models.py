@@ -10,8 +10,8 @@ class FavoritesModel(CustomBaseModel):
         return getattr(self, item)
 
 class ToggleFavoriteModel(CustomBaseModel):
-    owner_id: str
-    to_favorites_id: str
+    id: str
+    item_type :str
 
 class FavoritesRequestModel(CustomBaseModel):
     key: str = Field(alias="ownerId")
