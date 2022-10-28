@@ -47,3 +47,19 @@ def test_post_favorites_endpoint_fails_creating_existing_favorites_obj():
     #ASSERT
     assert response.status_code == 409
     assert response.json() == expected_error
+
+
+def test_delete_favorites_endpoint():
+    #ARRANGE
+    client = TestClient(app)
+    random_user_id = str(uuid.uuid1())
+    expected_favorites_obj = {
+        "ownerId":random_user_id,
+        "componentIds":[],
+        "productIds":[]
+    }
+    client.post("/favorites",json={"ownerId":random_user_id})
+    #ACT
+    response = client.delete("/favorites",json={"ownerId":random_user_id})
+    #ASSERT
+    assert response.status_code == 204
