@@ -50,6 +50,21 @@ def test_post_favorites_endpoint_fails_creating_existing_favorites_obj():
     assert response.status_code == 409
     assert response.json() == expected_error
 
+def test_post_favorite_endpoint_adds_product_favorite_to_list():
+    #ARRANGE
+    client = TestClient(app)
+    TEST_USER_ID = config("TEST_USER_ID")
+    expected_favorites_obj = {
+        "ownerId":TEST_USER_ID,
+        "componentIds":["546c08d7-539d-11ed-a980-cd9f67f7363d","546c08da-539d-11ed-a980-cd9f67f7363d"],
+        "productIds":["29f6f518-53a8-11ed-a980-cd9f67f7363d"]
+    }
+    #ACT
+    response = client.post("/favorites",Header={"userId":TEST_USER_ID})
+    #ASSERT
+    assert response.status_code == 201
+    assert response.json() == expected_favorites_obj
+    
 
 def test_delete_favorites_endpoint():
     #ARRANGE
