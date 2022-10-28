@@ -60,6 +60,41 @@ async def create_favorites_obj_for_user(owner:favorites_models.FavoritesRequestM
     return favorites_obj
 
 
+@app.post(
+    "/favorites/items",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={409 :{
+            "model": error_models.HTTPErrorModel,
+            "description": "Error raised if item is already in favorites list."
+        },
+        503 :{
+            "model": error_models.HTTPErrorModel,
+            "description": "Error raised if database requests fail."
+        }},
+    description="Adds an item to the favorites list of the user.",
+)
+async def adds_item_to_user_favorites_list(item_to_add:favorites_models.ToggleFavoriteModel, user_id: str = Header(alias="userId")):
+    try:
+        favorites_obj = favoritesDB.fetch({"key": user_id}).items[0]
+    except Exception as ex:
+            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Error while connecting to database")
+    
+    if item_to_add.item_type == "component":
+        if item_to_add.id in favorites_obj["component_ids"]:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Item is already in favorites list.")
+        update = { "component_ids":favoritesDB.util.append(item_to_add.id)}
+        
+    elif item_to_add.item_type == "product":
+        if item_to_add.id in favorites_obj["product_ids"]:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Item is already in favorites list.")
+        update = { "product_ids":favoritesDB.util.append(item_to_add.id)}
+    
+    try:
+        updated_favorites_obj = favoritesDB.update(update, user_id)
+    except Exception as ex:
+            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Error while connecting to database")
+
+
 @app.delete(
      "/favorites",
     status_code=status.HTTP_204_NO_CONTENT,
