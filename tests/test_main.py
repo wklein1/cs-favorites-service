@@ -8,7 +8,6 @@ def test_get_favorites_endpoint_returns_favorites_for_user():
     client = TestClient(app)
     TEST_USER_ID = config("TEST_USER_ID")
     expected_favorites_obj = {
-        "favoritesListId":"test_favorites_list_id",
         "ownerId":TEST_USER_ID,
         "componentIds":["546c08d7-539d-11ed-a980-cd9f67f7363d","546c08da-539d-11ed-a980-cd9f67f7363d"],
         "productIds":[]
@@ -30,7 +29,21 @@ def test_post_favorites_endpoint_creates_favorites_obj():
         "productIds":[]
     }
     #ACT
-    response = client.post("/favorites",json={"userId":random_user_id})
+    response = client.post("/favorites",json={"ownerId":random_user_id})
     #ASSERT
     assert response.status_code == 201
-    assert response.json() >= expected_favorites_obj
+    assert response.json().items() >= expected_favorites_obj.items()
+
+
+def test_post_favorites_endpoint_fails_creating_existing_favorites_obj():
+    #ARRANGE
+    client = TestClient(app)
+    TEST_USER_ID = config("TEST_USER_ID")
+    expected_error = {
+        "detail": "User already has a favorites list."
+    }
+    #ACT
+    response = client.post("/favorites",json={"ownerId":TEST_USER_ID})
+    #ASSERT
+    assert response.status_code == 409
+    assert response.json() == expected_error
