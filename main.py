@@ -33,7 +33,7 @@ app.add_middleware(
     description="Get all favorites belonging to a user.",    
 )
 async def get_favorites_for_user(user_id: str = Header(alias="userId")):
-    return favoritesDB.fetch({"owner_id": user_id}).items[0]
+    return favoritesDB.fetch({"key": user_id}).items[0]
 
 
 @app.post(
