@@ -58,3 +58,12 @@ async def create_favorites_obj_for_user(owner:favorites_models.FavoritesRequestM
     except Exception as ex:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User already has a favorites list.")
     return favorites_obj
+
+
+@app.delete(
+     "/favorites",
+    status_code=status.HTTP_204_NO_CONTENT,
+    description="Deletes the favorites list of a user",
+)
+async def delete_favorites_obj_for_user(owner:favorites_models.FavoritesRequestModel):
+    favoritesDB.delete(owner.key)
