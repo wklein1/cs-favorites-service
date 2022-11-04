@@ -50,8 +50,8 @@ async def get_favorites_for_user(user_id: str = Header(alias="userId")):
 async def create_favorites_obj_for_user(owner:favorites_models.FavoritesRequestModel):
     try:
         new_favorites_obj = {
-            "componentIds":[],
-            "productIds":[]
+            "component_ids":[],
+            "product_ids":[]
         }
         new_favorites_obj["key"] = owner.key
         favorites_obj = favoritesDB.insert(new_favorites_obj)
