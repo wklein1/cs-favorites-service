@@ -2,6 +2,8 @@
 
 [![Automated tests](https://github.com/wklein1/cs-favorites-service/actions/workflows/python-app.yml/badge.svg?branch=main)](https://github.com/wklein1/cs-favorites-service/actions/workflows/python-app.yml)
 
+![favorites3](https://user-images.githubusercontent.com/75163928/200684378-963165e9-6136-49c8-841f-a8b4b7d8b730.jpg)
+
 
 Favorites service deploy: https://cs-favorites-service.deta.dev/docs
 
