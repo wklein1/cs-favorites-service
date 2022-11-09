@@ -4,7 +4,9 @@
 
 ![favorites3](https://user-images.githubusercontent.com/75163928/200684378-963165e9-6136-49c8-841f-a8b4b7d8b730.jpg)
 
-A fullstack application project with microservice architecture backend. (Work in progress)
+A fullstack web application project with microservice architecture backend.
+
+(Work in progress)
 
 Tech Stack: React, FastApi, Deta (noSQL cloud DB)
 
