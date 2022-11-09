@@ -2,13 +2,18 @@ from fastapi import FastAPI, Header, Body, status, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from decouple import config
 from models import favorites_models, error_models
+from modules.jwt.jwt_module import JwtEncoder
 import deta
 import uuid
 
 PROJECT_KEY = config("PROJECT_KEY")
+MICROSERVICE_ACCESS_SECRET = config("MICROSERVICE_ACCESS_SECRET")
+JWT_ALGORITHM="HS256"
 
 deta = deta.Deta(PROJECT_KEY)
 favoritesDB = deta.Base("favorites")
+
+microservice_access_jwt_encoder = JwtEncoder(secret=MICROSERVICE_ACCESS_SECRET, algorithm=JWT_ALGORITHM)
 
 app = FastAPI()
 
@@ -26,13 +31,18 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
+def protect_route(microservice_access_token:str):
+    if not microservice_access_jwt_encoder.validate_jwt(token=microservice_access_token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid token")
+
 @app.get(
     "/favorites",
     response_model=favorites_models.FavoritesModel,
     response_description="Returns favorites object with lists of product and component favorites",
     description="Get all favorites belonging to a user.",    
 )
-async def get_favorites_for_user(user_id: str = Header(alias="userId")):
+async def get_favorites_for_user(user_id: str = Header(alias="userId"), microservice_access_token:str = Header(alias="microserviceAccessToken")):
+    protect_route(microservice_access_token)
     return favoritesDB.fetch({"key": user_id}).items[0]
 
 
@@ -47,7 +57,9 @@ async def get_favorites_for_user(user_id: str = Header(alias="userId")):
         }},
     description="Create a new favorites list for a user",
 )
-async def create_favorites_obj_for_user(owner:favorites_models.FavoritesRequestModel):
+async def create_favorites_obj_for_user(owner:favorites_models.FavoritesRequestModel, microservice_access_token:str = Header(alias="microserviceAccessToken")):
+    protect_route(microservice_access_token)
+    
     try:
         new_favorites_obj = {
             "component_ids":[],
@@ -73,7 +85,9 @@ async def create_favorites_obj_for_user(owner:favorites_models.FavoritesRequestM
         }},
     description="Adds an item to the favorites list of the user.",
 )
-async def adds_item_to_user_favorites_list(item_to_add:favorites_models.ToggleFavoriteModel, user_id: str = Header(alias="userId")):
+async def adds_item_to_user_favorites_list(item_to_add:favorites_models.ToggleFavoriteModel, user_id: str = Header(alias="userId"), microservice_access_token:str = Header(alias="microserviceAccessToken")):
+    protect_route(microservice_access_token)
+    
     try:
         favorites_obj = favoritesDB.fetch({"key": user_id}).items[0]
     except Exception:
@@ -100,7 +114,9 @@ async def adds_item_to_user_favorites_list(item_to_add:favorites_models.ToggleFa
     status_code=status.HTTP_204_NO_CONTENT,
     description="Deletes the favorites list of a user",
 )
-async def delete_favorites_obj_for_user(owner:favorites_models.FavoritesRequestModel):
+async def delete_favorites_obj_for_user(owner:favorites_models.FavoritesRequestModel, microservice_access_token:str = Header(alias="microserviceAccessToken")):
+    protect_route(microservice_access_token)
+   
     try:
         favoritesDB.delete(owner.key)
     except Exception:
@@ -116,7 +132,9 @@ async def delete_favorites_obj_for_user(owner:favorites_models.FavoritesRequestM
         }},
     description="Removes an item from the favorites list of a user"
 )
-async def delete_item_from_favorites_for_user(item_to_remove:favorites_models.ToggleFavoriteModel, user_id: str = Header(alias="userId")):
+async def delete_item_from_favorites_for_user(item_to_remove:favorites_models.ToggleFavoriteModel, user_id: str = Header(alias="userId"), microservice_access_token:str = Header(alias="microserviceAccessToken")):
+    protect_route(microservice_access_token)
+    
     try:
         favorites_obj = favoritesDB.fetch({"key": user_id}).items[0]
     except Exception:
